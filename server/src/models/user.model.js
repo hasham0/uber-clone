@@ -36,8 +36,9 @@ userSchema.static.hashPassword = async function (password) {
 };
 
 userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
-    console.log("🚀 ~ token:", token);
+    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+        expiresIn: "24h",
+    });
     return token;
 };
 
