@@ -12,7 +12,7 @@ The API uses **JWT (JSON Web Token)** for authentication. Tokens are generated u
 
 ---
 
-## API Endpoints
+## USER API Endpoints
 
 ### 1. User Registration
 
@@ -233,12 +233,43 @@ The request body must be a JSON object with the following fields:
 
 ## Blacklist Token
 
-**Description:** The blacklist token mechanism is used to invalidate tokens upon user logout. When a user logs out, their token is added to the blacklist and will no longer be accepted for authentication.
+**Description:** The blacklist token mechanism is used to invalidate tokens upon user logout. When a user logs out, their token is added to the blacklist and will no longer be accepted for authentication.To enhance security, tokens can be blacklisted after a user logs out or when a token is deemed invalid due to security concerns. The blacklisting mechanism ensures that no unauthorized requests are processed using a compromised token.
 
 **Schema:**
 
 -   `token`: The JWT token string.
 -   `createdAt`: The timestamp when the token was blacklisted. The token will automatically expire and be removed from the database after 24 hours.
+
+### How It Works
+
+-   On logout, the JWT token is stored in a database table/collection (e.g., `BlacklistToken`).
+-   For every authenticated request, the middleware checks if the token exists in the blacklist.
+-   If the token is blacklisted, the server responds with a `401 Unauthorized` error.
+
+### Example Blacklist Token Model
+
+```javascript
+const mongoose = require("mongoose");
+
+const blacklistTokenSchema = new mongoose.Schema({
+    token: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now, expires: "7d" }, // Tokens expire after 7 days
+});
+
+module.exports = mongoose.model("BlacklistToken", blacklistTokenSchema);
+```
+
+### Example Blacklisting on Logout
+
+```javascript
+router.get("/captain/logout", authCaptain, async (request, response) => {
+    const token = request.headers.authorization.split(" ")[1];
+
+    await BlacklistToken.create({ token });
+
+    return response.status(200).json({ message: "logout captain" });
+});
+```
 
 **Example:**
 
@@ -321,17 +352,116 @@ const logoutUser = asyncHandler(async (request, response) => {
 -   **Performance**: Optimize the check function for fast lookups.
 -   **Maintenance**: Regularly update the blacklist to reflect current security
 
-### 5. Captain Registration
+## Captain Endpoints
 
-#### **Endpoint**
+### 1. Captain Profile
 
-`POST /captain/register`
+#### Endpoint
 
-#### **Description**
+**GET** `/captain/profile`
+
+#### Description
+
+Retrieves the profile of the authenticated captain.
+
+#### Headers
+
+| Header        | Type   | Required | Description                  |
+| ------------- | ------ | -------- | ---------------------------- |
+| Authorization | string | Yes      | Bearer token for the captain |
+
+#### Responses
+
+**200 OK**
+
+-   Description: Captain profile retrieved successfully.
+-   Response Body:
+
+```json
+{
+    "data": {
+        "_id": "60c72b2f9b1e8b001c8e4d5a",
+        "fullname": {
+            "firstname": "Jane",
+            "lastname": "Doe"
+        },
+        "email": "jane.doe@example.com",
+        "vehicle": {
+            "color": "Red",
+            "plate": "ABC1234",
+            "capacity": 4,
+            "vehicleType": "car"
+        }
+    }
+}
+```
+
+**401 Unauthorized**
+
+-   Description: Invalid or missing token.
+-   Response Body:
+
+```json
+{
+    "message": "Unauthorized"
+}
+```
+
+---
+
+### 2. Captain Logout
+
+#### Endpoint
+
+**GET** `/captain/logout`
+
+#### Description
+
+Logs out the authenticated captain by blacklisting their token.
+
+#### Headers
+
+| Header        | Type   | Required | Description                  |
+| ------------- | ------ | -------- | ---------------------------- |
+| Authorization | string | Yes      | Bearer token for the captain |
+
+#### Responses
+
+**200 OK**
+
+-   Description: Captain successfully logged out.
+-   Response Body:
+
+```json
+{
+    "message": "logout captain"
+}
+```
+
+**401 Unauthorized**
+
+-   Description: Invalid or missing token.
+-   Response Body:
+
+```json
+{
+    "message": "Unauthorized"
+}
+```
+
+---
+
+### 3. Captain Registration
+
+#### Endpoint
+
+**POST** `/captain/register`
+
+#### Description
 
 This endpoint registers a new captain in the system.
 
-#### **Request Body**
+#### Request Body
 
 The request body should be a JSON object with the following fields:
 
@@ -366,6 +496,61 @@ The request body should be a JSON object with the following fields:
     }
 }
 ```
+
+---
+
+## Middleware
+
+### `authCaptain`
+
+The `authCaptain` middleware is used to authenticate captains by verifying their JWT token.
+
+#### Usage
+
+To use the `authCaptain` middleware, import it and add it to your route:
+
+```javascript
+import { authCaptain } from "../middlewares/auth.middleware.js";
+
+router.get("/captain/profile", authCaptain, getCaptainProfile);
+```
+
+#### Implementation
+
+The `authCaptain` middleware checks for the presence of a JWT token in the request headers or cookies. If the token is valid and not blacklisted, the request proceeds; otherwise, an unauthorized response is returned.
+
+```javascript
+const authCaptain = asyncHandler(async (request, response, next) => {
+    const token =
+        request.cookies[ACCESS_TOKEN] ||
+        request.headers?.authorization?.split(" ")[1];
+
+    if (!token) {
+        return response.status(401).json({ message: "Unauthorized" });
+    }
+
+    const isTokenBlacklisted = await BlacklistToken.findOne({ token });
+
+    if (isTokenBlacklisted) {
+        return response.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const isCaptainExist = await Captain.findById({ _id: decoded._id });
+        request.captain = isCaptainExist;
+        next();
+    } catch (error) {
+        return response.status(401).json({ message: "Unauthorized" });
+    }
+});
+
+export { authCaptain };
+```
+
+---
+
+Thank you for using the Captain API! If you have any questions, feel free to reach out.
 
 policies.
 

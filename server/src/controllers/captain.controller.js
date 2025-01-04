@@ -3,6 +3,7 @@ import Captain, { captainSchema } from "../models/captain.model.js";
 import { validationResult } from "express-validator";
 import { ACCESS_TOKEN, cookieOptions } from "../constant.js";
 import createCaptain from "../lib/services/captain.service.js";
+import BlacklistToken from "../models/blacklistToken.model.js";
 
 const registerCaptain = asyncHandler(async (request, response) => {
     const errors = validationResult(request);
@@ -41,4 +42,50 @@ const registerCaptain = asyncHandler(async (request, response) => {
         .json({ message: "Captain registered" });
 });
 
-export { registerCaptain };
+const loginCaptain = asyncHandler(async (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+        return response.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password } = request.body;
+
+    const isCaptainExist = await Captain.findOne({ email }).select("+password");
+    if (!isCaptainExist) {
+        return response
+            .status(401)
+            .json({ message: "invalid email or password" });
+    }
+    const isPasswordMatch = await isCaptainExist.comparePassword(password);
+    if (!isPasswordMatch) {
+        return response
+            .status(401)
+            .json({ message: "invalid email or password" });
+    }
+
+    // TODO: generate token from created user instance
+    const token = await isCaptainExist.generateAuthToken();
+
+    return response
+        .status(200)
+        .cookie(ACCESS_TOKEN, token, cookieOptions)
+        .json({ data: isCaptainExist, token });
+});
+
+const getCaptainProfile = asyncHandler(async (request, response) => {
+    return response.status(200).json({
+        data: request.captain,
+    });
+});
+
+const logoutCaptain = asyncHandler(async (request, response) => {
+    const token =
+        request.cookies[ACCESS_TOKEN] ||
+        request.headers.authorization.split(" ")[1];
+    await BlacklistToken.create({ token });
+    return response
+        .status(200)
+        .clearCookie(ACCESS_TOKEN)
+        .json({ message: "logout user" });
+});
+export { registerCaptain, loginCaptain, getCaptainProfile, logoutCaptain };

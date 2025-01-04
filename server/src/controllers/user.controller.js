@@ -61,7 +61,7 @@ const loginUser = asyncHandler(async (request, response) => {
     return response
         .status(200)
         .cookie(ACCESS_TOKEN, token, cookieOptions)
-        .json({ isUserExist, token });
+        .json({ data: isUserExist, token });
 });
 
 const getUserProfile = asyncHandler(async (request, response) => {
