@@ -319,7 +319,55 @@ const logoutUser = asyncHandler(async (request, response) => {
 
 -   **Scalability**: Ensure the blacklist can handle a large number of tokens.
 -   **Performance**: Optimize the check function for fast lookups.
--   **Maintenance**: Regularly update the blacklist to reflect current security policies.
+-   **Maintenance**: Regularly update the blacklist to reflect current security
+
+### 5. Captain Registration
+
+#### **Endpoint**
+
+`POST /captain/register`
+
+#### **Description**
+
+This endpoint registers a new captain in the system.
+
+#### **Request Body**
+
+The request body should be a JSON object with the following fields:
+
+| Field                 | Type   | Required | Description                                               |
+| --------------------- | ------ | -------- | --------------------------------------------------------- |
+| `fullname`            | object | Yes      | Contains the captain's first and last name.               |
+| `firstname`           | string | Yes      | Must be at least 3 characters long.                       |
+| `lastname`            | string | No       | Must be at least 3 characters long.                       |
+| `email`               | string | Yes      | Must be a valid email address.                            |
+| `password`            | string | Yes      | Must be at least 6 characters long.                       |
+| `vehicle`             | object | Yes      | Contains the captain's vehicle details.                   |
+| `vehicle.color`       | string | Yes      | The vehicle's color (min length: 3).                      |
+| `vehicle.plate`       | string | Yes      | The vehicle's plate number (min length: 5).               |
+| `vehicle.capacity`    | number | Yes      | The vehicle's capacity (min: 1).                          |
+| `vehicle.vehicleType` | string | Yes      | The vehicle's type (one of: "car", "motorcycle", "auto"). |
+
+#### Example:
+
+```json
+{
+    "fullname": {
+        "firstname": "Jane",
+        "lastname": "Doe"
+    },
+    "email": "jane.doe@example.com",
+    "password": "securepassword",
+    "vehicle": {
+        "color": "Red",
+        "plate": "ABC1234",
+        "capacity": 4,
+        "vehicleType": "car"
+    }
+}
+```
+
+policies.
 
 This documentation provides an overview of the blacklist implementation, its components, usage, benefits, and considerations.
 

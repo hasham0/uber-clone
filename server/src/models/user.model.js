@@ -2,33 +2,42 @@ import { model, Schema } from "mongoose";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const userSchema = new Schema({
-    fullname: {
-        firstname: {
+const userSchema = new Schema(
+    {
+        fullname: {
+            firstname: {
+                type: String,
+                required: true,
+                minlength: [3, "First name must be atleast 3 characters"],
+            },
+            lastname: {
+                type: String,
+                minlength: [3, "Last name must be atleast 3 characters"],
+            },
+        },
+        email: {
             type: String,
             required: true,
-            minlength: [3, "First name must be atleast 3 characters"],
+            unique: true,
+            minlength: [5, "Email must be alteast 5 characters long"],
+            matcher: [
+                "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$",
+                "Invalid email format",
+            ],
         },
-        lastname: {
+        password: {
             type: String,
-            minlength: [3, "last name must be atleast 3 characters"],
+            required: true,
+            select: false,
+        },
+        socketId: {
+            type: String,
         },
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        minlength: [5, "Email must be alteast 5 characters long"],
-    },
-    password: {
-        type: String,
-        required: true,
-        select: false,
-    },
-    socketId: {
-        type: String,
-    },
-});
+    {
+        timestamps: true,
+    }
+);
 
 userSchema.static.hashPassword = async function (password) {
     const salt = await bcryptjs.genSalt(10);

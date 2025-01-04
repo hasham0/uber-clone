@@ -12,6 +12,14 @@ const registerUser = asyncHandler(async (request, response) => {
     }
     const { fullname, email, password } = request.body;
 
+    const isUserExist = await User.findOne({ email });
+
+    if (isUserExist) {
+        return response
+            .status(400)
+            .json({ message: "User already registered" });
+    }
+
     const hashedPassord = await userSchema.static.hashPassword(password);
     const user = await createUser({
         firstname: fullname.firstname,
