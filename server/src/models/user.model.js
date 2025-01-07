@@ -1,6 +1,8 @@
-import { model, Schema } from "mongoose";
+import mongoose from "mongoose";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+
+const { model, models, Schema } = mongoose;
 
 const userSchema = new Schema(
     {
@@ -39,9 +41,15 @@ const userSchema = new Schema(
     }
 );
 
-userSchema.static.hashPassword = async function (password) {
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
     const salt = await bcryptjs.genSalt(10);
-    return await bcryptjs.hash(password, salt);
+    this.password = await bcryptjs.hash(this.password, salt);
+    next();
+});
+
+userSchema.methods.comparePassword = async function (password) {
+    return await bcryptjs.compare(password, this.password);
 };
 
 userSchema.methods.generateAuthToken = function () {
@@ -51,11 +59,5 @@ userSchema.methods.generateAuthToken = function () {
     return token;
 };
 
-userSchema.methods.comparePassword = async function (password) {
-    return await bcryptjs.compare(password, this.password);
-};
-
-const User = model["User"] || model("User", userSchema);
-export { userSchema };
+const User = models.User || model("User", userSchema);
 export default User;
-// require("node:crypto").randomBytes(24).toString("hex");

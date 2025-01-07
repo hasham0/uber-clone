@@ -1,6 +1,8 @@
-import { Schema, model } from "mongoose";
+import mongoose from "mongoose";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+
+const { model, models, Schema } = mongoose;
 
 const captainSchema = new Schema(
     {
@@ -74,6 +76,17 @@ const captainSchema = new Schema(
     }
 );
 
+captainSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+    const salt = await bcryptjs.genSalt(10);
+    this.password = await bcryptjs.hash(this.password, salt);
+    next();
+});
+
+captainSchema.methods.comparePassword = async function (password) {
+    return await bcryptjs.compare(password, this.password);
+};
+
 captainSchema.methods.generateAuthToken = function () {
     const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET_CAPTAIN, {
         expiresIn: "24h",
@@ -81,16 +94,6 @@ captainSchema.methods.generateAuthToken = function () {
     return token;
 };
 
-captainSchema.methods.comparePassword = async function (password) {
-    return await bcryptjs.compare(password, this.password);
-};
+const Captain = models.Captain || model("Captain", captainSchema);
 
-captainSchema.static.hashPassword = async function (password) {
-    const salt = await bcryptjs.genSalt(10);
-    return await bcryptjs.hash(password, salt);
-};
-
-const Captain = model["Captain"] || model("Captain", captainSchema);
-
-export { captainSchema };
 export default Captain;

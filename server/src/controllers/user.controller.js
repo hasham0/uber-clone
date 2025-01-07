@@ -1,31 +1,32 @@
 import { ACCESS_TOKEN, cookieOptions } from "../constant.js";
 import { createUser } from "../lib/services/user.service.js";
+import {
+    CustomError,
+    ValidationError,
+} from "../lib/utils/customize-error-messages.js";
 import asyncHandler from "../middlewares/async-handler.js";
 import BlacklistToken from "../models/blacklistToken.model.js";
-import User, { userSchema } from "../models/user.model.js";
+import User from "../models/user.model.js";
 import { validationResult } from "express-validator";
 
 const registerUser = asyncHandler(async (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
-        return response.status(400).json({ errors: errors.array() });
+        throw new ValidationError(errors.array(), 400);
     }
     const { fullname, email, password } = request.body;
 
     const isUserExist = await User.findOne({ email });
 
     if (isUserExist) {
-        return response
-            .status(400)
-            .json({ message: "User already registered" });
+        throw new CustomError("User already registered", 400);
     }
 
-    const hashedPassord = await userSchema.static.hashPassword(password);
     const user = await createUser({
         firstname: fullname.firstname,
         lastname: fullname.lastname,
         email,
-        password: hashedPassord,
+        password,
     });
 
     // TODO: generate token from created user instance
@@ -37,22 +38,19 @@ const registerUser = asyncHandler(async (request, response) => {
 const loginUser = asyncHandler(async (request, response) => {
     const errors = validationResult(request);
     if (!errors.isEmpty()) {
-        return response.status(400).json({ errors: errors.array() });
+        throw new ValidationError(errors.array(), 400);
     }
 
     const { email, password } = request.body;
 
     const isUserExist = await User.findOne({ email }).select("+password");
     if (!isUserExist) {
-        return response
-            .status(401)
-            .json({ message: "invalid email or password" });
+        throw new CustomError("invalid email or password", 401);
     }
+
     const isPasswordMatch = await isUserExist.comparePassword(password);
     if (!isPasswordMatch) {
-        return response
-            .status(401)
-            .json({ message: "invalid email or password" });
+        throw new CustomError("invalid email or password", 401);
     }
 
     // TODO: generate token from created user instance

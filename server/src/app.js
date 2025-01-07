@@ -1,6 +1,10 @@
+// import and set dotenv config
+import dotenv from "dotenv";
+dotenv.config();
+
+// import modules
 import cors from "cors";
 import morgan from "morgan";
-import dotenv from "dotenv";
 import express from "express";
 import cookieParser from "cookie-parser";
 
@@ -8,11 +12,11 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route.js";
 import captainRoutes from "./routes/captain.route.js";
 
+// import global level error handle middlewares
+import errorMiddleware from "./middlewares/error.middleware.js";
+
 // set variable
 const app = express();
-
-// set dotenv config
-dotenv.config();
 
 // set middlewares
 app.use(express.json());
@@ -29,5 +33,8 @@ app.use(
 // set routes
 app.use("/api/user", userRoutes);
 app.use("/api/captain", captainRoutes);
+
+// set global level error handling middlwere
+app.use(errorMiddleware);
 
 export default app;

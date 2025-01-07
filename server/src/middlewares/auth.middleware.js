@@ -4,19 +4,20 @@ import asyncHandler from "./async-handler.js";
 import { ACCESS_TOKEN } from "../constant.js";
 import BlacklistToken from "../models/blacklistToken.model.js";
 import Captain from "../models/captain.model.js";
+import { CustomError } from "../lib/utils/customize-error-messages.js";
 
 const authUser = asyncHandler(async (request, response, next) => {
     const token =
         request.cookies[ACCESS_TOKEN] ||
         request.headers?.authorization?.split(" ")[1];
     if (!token) {
-        return response.status(401).json({ message: "Unauthorized" });
+        throw new CustomError("Unauthorized", 401);
     }
 
     const isTokenBlacklisted = await BlacklistToken.findOne({ token });
 
     if (isTokenBlacklisted) {
-        return response.status(401).json({ message: "Unauthorized" });
+        throw new CustomError("Unauthorized", 401);
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -34,13 +35,13 @@ const authCaptain = asyncHandler(async (request, response, next) => {
         request.headers?.authorization?.split(" ")[1];
 
     if (!token) {
-        return response.status(401).json({ message: "Unauthorized" });
+        throw new CustomError("Unauthorized", 401);
     }
 
     const isTokenBlacklisted = await BlacklistToken.findOne({ token });
 
     if (isTokenBlacklisted) {
-        return response.status(401).json({ message: "Unauthorized" });
+        throw new CustomError("Unauthorized", 401);
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_CAPTAIN);
