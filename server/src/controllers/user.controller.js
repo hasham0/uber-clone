@@ -78,4 +78,5 @@ const logoutUser = asyncHandler(async (request, response) => {
         .clearCookie(ACCESS_TOKEN)
         .json({ message: "logout user" });
 });
+
 export { registerUser, loginUser, getUserProfile, logoutUser };

@@ -22,10 +22,13 @@ const authUser = asyncHandler(async (request, response, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const isUserExist = await User.findById({ _id: decoded._id });
+        if (!isUserExist) {
+            throw new CustomError("Unauthorized", 401);
+        }
         request.user = isUserExist;
         next();
     } catch (error) {
-        return response.status(401).json({ message: "Unauthorized" });
+        next(error);
     }
 });
 
@@ -46,10 +49,13 @@ const authCaptain = asyncHandler(async (request, response, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_CAPTAIN);
         const isCaptainExist = await Captain.findById({ _id: decoded._id });
+        if (!isCaptainExist) {
+            throw new CustomError("Unauthorized", 401);
+        }
         request.captain = isCaptainExist;
         next();
     } catch (error) {
-        return response.status(401).json({ message: "Unauthorized" });
+        next(error);
     }
 });
 
