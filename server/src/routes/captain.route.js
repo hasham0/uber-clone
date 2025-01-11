@@ -50,6 +50,6 @@ router
     );
 router.route("/profile").get([authCaptain], getCaptainProfile);
 
-router.route("/logout").get([authCaptain], logoutCaptain);
+router.route("/logout").post([authCaptain], logoutCaptain);
 
 export default router;

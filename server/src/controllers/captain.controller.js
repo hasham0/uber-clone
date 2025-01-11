@@ -39,7 +39,7 @@ const registerCaptain = asyncHandler(async (request, response) => {
     return response
         .status(201)
         .cookie(ACCESS_TOKEN, token, cookieOptions)
-        .json({ message: "Captain registered" });
+        .json({ data: captain, token, message: "Captain registered" });
 });
 
 const loginCaptain = asyncHandler(async (request, response) => {
@@ -66,7 +66,7 @@ const loginCaptain = asyncHandler(async (request, response) => {
     return response
         .status(200)
         .cookie(ACCESS_TOKEN, token, cookieOptions)
-        .json({ data: isCaptainExist, token });
+        .json({ data: isCaptainExist, token, message: "Captain login" });
 });
 
 const getCaptainProfile = asyncHandler(async (request, response) => {
@@ -83,6 +83,6 @@ const logoutCaptain = asyncHandler(async (request, response) => {
     return response
         .status(200)
         .clearCookie(ACCESS_TOKEN)
-        .json({ message: "logout user" });
+        .json({ message: "Captain logout" });
 });
 export { registerCaptain, loginCaptain, getCaptainProfile, logoutCaptain };

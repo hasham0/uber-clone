@@ -88,9 +88,13 @@ captainSchema.methods.comparePassword = async function (password) {
 };
 
 captainSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET_CAPTAIN, {
-        expiresIn: "24h",
-    });
+    const token = jwt.sign(
+        { _id: this._id, timestamps: Date.now() },
+        process.env.JWT_SECRET_CAPTAIN,
+        {
+            expiresIn: "24h",
+        }
+    );
     return token;
 };
 

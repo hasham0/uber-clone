@@ -1,18 +1,58 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SignInSchema, SignInSchemaTS } from "../lib/schema";
-import { Link } from "react-router-dom";
+import { SignInSchema, SignInSchemaTS, SignUpSchemaTS } from "../lib/schema";
+import { Link, useNavigate } from "react-router-dom";
 import uberLogo from "../assets/images/uberLogo.png";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { userLogin } from "../lib/utils/user/user-query-funtions";
+import { useUserContextHook } from "../context/hooks/useUserContext";
 
 type Props = {};
 
 export default function UserLogin({}: Props) {
-  const { register, handleSubmit } = useForm<SignInSchemaTS>({
+  const { setUser } = useUserContextHook();
+
+  const { register, handleSubmit, reset } = useForm<SignInSchemaTS>({
     resolver: zodResolver(SignInSchema),
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler<SignInSchemaTS> = (userData) => {
-    console.log(userData);
+  const { mutateAsync, isPending } = useMutation<
+    {
+      data: SignUpSchemaTS;
+      token: string;
+      message?: string;
+    },
+    Error,
+    SignInSchemaTS
+  >({
+    mutationKey: ["signin"],
+    mutationFn: (userData) => userLogin(userData),
+    onSuccess(data) {
+      return data;
+    },
+    onError(error) {
+      return error;
+    },
+  });
+
+  const navigate = useNavigate();
+  const onSubmit: SubmitHandler<SignInSchemaTS> = async (userData) => {
+    try {
+      const response = await mutateAsync(userData);
+      if (!response.data || !response.token) {
+        throw new Error(response.message || "An error occurred");
+      }
+      const { data, token } = response;
+      setUser(data);
+      localStorage.setItem("token", JSON.stringify(token));
+      navigate("/home");
+      reset();
+    } catch (error) {
+      const err = error instanceof Error ? error.message : "An error occurred";
+      setErrorMessage(err);
+    }
   };
 
   return (
@@ -54,6 +94,7 @@ export default function UserLogin({}: Props) {
               />
             </div>
             <button
+              disabled={isPending}
               className="w-full rounded-md border-2 border-black bg-black p-1 text-lg capitalize text-white"
               type="submit"
             >
@@ -68,12 +109,15 @@ export default function UserLogin({}: Props) {
             >
               Create your account
             </Link>
-          </p>
+          </p>{" "}
+          {errorMessage && (
+            <p className="text-sm text-red-600">{errorMessage}</p>
+          )}
         </div>
         <div className="mb-10 flex w-full flex-col items-center justify-center gap-1 px-10 py-4">
           <Link
             to="/captain-login"
-            className="bg-captain w-full rounded-md p-3 text-center text-lg text-white"
+            className="w-full rounded-md bg-captain p-3 text-center text-lg text-white"
           >
             Sign In as Captain
           </Link>

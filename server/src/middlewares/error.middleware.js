@@ -33,7 +33,7 @@ function errorMiddleware(error, req, res, next) {
     }
 
     // Send response to the user
-    res.status(statusCode).json({
+    return res.status(statusCode).json({
         success: false,
         message,
         errors: errors || [],

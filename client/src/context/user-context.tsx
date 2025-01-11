@@ -3,7 +3,6 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
-  useContext,
   useState,
 } from "react";
 import { SignUpSchemaTS } from "../lib/schema";
@@ -12,12 +11,13 @@ type Props = {
   children: ReactNode;
 };
 
-type userContextTS = {
+type UserContextTS = {
   user: SignUpSchemaTS;
   setUser: Dispatch<SetStateAction<SignUpSchemaTS>>;
 };
 
-const UserDataContext = createContext<userContextTS | null>(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const UserDataContext = createContext<UserContextTS | null>(null);
 
 export default function UserContext({ children }: Props) {
   const [user, setUser] = useState<SignUpSchemaTS>({
@@ -35,13 +35,3 @@ export default function UserContext({ children }: Props) {
     </UserDataContext.Provider>
   );
 }
-
-export const UserContextHook = () => {
-  const user = useContext(UserDataContext);
-  if (user === null) {
-    throw new Error(
-      "UserContextHook must be used within a UserContextProvider",
-    );
-  }
-  return user;
-};

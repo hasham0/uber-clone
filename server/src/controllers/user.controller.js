@@ -32,7 +32,9 @@ const registerUser = asyncHandler(async (request, response) => {
     // TODO: generate token from created user instance
     const token = await user.generateAuthToken();
 
-    return response.status(201).json({ user, token });
+    return response
+        .status(201)
+        .json({ data: user, token, message: "User registered" });
 });
 
 const loginUser = asyncHandler(async (request, response) => {
