@@ -79,5 +79,18 @@ const SignUpSchemaCaptain = z.object({
 
 type SignUpSchemaCaptainTS = z.infer<typeof SignUpSchemaCaptain>;
 
-export { SignInSchema, SignUpSchema, SignUpSchemaCaptain };
-export type { SignInSchemaTS, SignUpSchemaTS, SignUpSchemaCaptainTS };
+// pickup-trip schema
+const PickUpSchema = z.object({
+  pickUpLocation: z.string(),
+  dropDestination: z.string(),
+});
+
+type PickUpSchemaTS = z.infer<typeof PickUpSchema>;
+
+export { SignInSchema, SignUpSchema, SignUpSchemaCaptain, PickUpSchema };
+export type {
+  SignInSchemaTS,
+  SignUpSchemaTS,
+  SignUpSchemaCaptainTS,
+  PickUpSchemaTS,
+};

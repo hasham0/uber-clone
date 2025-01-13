@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SignUpSchemaTS } from "../lib/schema";
 import { userProfile } from "../lib/utils/user/user-query-funtions";
+import Loading from "../components/loading";
 
 type Props = { children: ReactNode };
 
@@ -35,7 +36,7 @@ export default function UserProtectedWrapper({ children }: Props) {
   }, [isLoading, isError, data, navigate, token]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return <>{children}</>;

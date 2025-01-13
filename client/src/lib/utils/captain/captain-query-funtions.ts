@@ -31,6 +31,7 @@ const captainProfile = async () => {
       authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    credentials: "omit",
   });
   return response.json();
 };
@@ -43,6 +44,7 @@ const captainLogout = async () => {
       authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    credentials: "omit",
   });
   return response.json();
 };

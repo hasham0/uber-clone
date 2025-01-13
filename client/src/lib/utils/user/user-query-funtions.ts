@@ -24,11 +24,14 @@ const userLogin = async (data: SignInSchemaTS) => {
 };
 
 const userProfile = async () => {
+  const token = JSON.parse(localStorage.getItem("token")!);
   const response = await fetch(userQueryUrl.profile, {
     method: "GET",
     headers: {
+      authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    credentials: "omit",
   });
   return response.json();
 };
@@ -40,6 +43,7 @@ const userLogout = async () => {
       authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    credentials: "omit",
   });
   return response.json();
 };
