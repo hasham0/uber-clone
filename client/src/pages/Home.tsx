@@ -6,22 +6,31 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ChevronDown, User } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import LocationPanel from "../components/location-panel";
-import uberCar from "../assets/images/Uber-PNG-Photos.png";
-import uberBike from "../assets/images/Uber-bike.webp";
-import uberAuto from "../assets/images/Uber-Auto.webp";
+import VehiclePanel from "../components/vehicle-panel";
+import ConfirmRide from "../components/confrm-ride";
+import LookingForDriver from "../components/looking-for-driver";
+import WaitingForDriver from "../components/waiting-for-driver";
 
 type Props = {};
 
 export default function Home({}: Props) {
   const [panelOpen, setPanelOpen] = useState<boolean>(false);
+  const [vehiclePanelOpen, setVehicalPanelOpen] = useState<boolean>(false);
+  const [confirmRidePanelOpen, setConfirmRidePanelOpen] =
+    useState<boolean>(false);
+  const [vehicalFoundPanelOpen, setvehicalFoundPanelOpen] =
+    useState<boolean>(false);
+  const [waitingForDriverPanelOpen, setWaitingForDriverPanelOpen] =
+    useState<boolean>(false);
+
   const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
   const vehiclePanelRef = useRef(null);
-  const vehiclePanelCloseRef = useRef(null);
-
-  const [vehiclePanelOpen, setVehicalPanelOpen] = useState<boolean>(false);
+  const confirmRidePanelRef = useRef(null);
+  const vehicalFoundPanelRef = useRef(null);
+  const waitingForDriverRef = useRef(null);
 
   useGSAP(() => {
     if (panelOpen) {
@@ -61,25 +70,89 @@ export default function Home({}: Props) {
       });
     } else {
       const timeline = gsap.timeline(); // Use a timeline to sequence animations
-      timeline
-        .to(vehiclePanelRef.current, {
-          y: "100%", // Moves the panel off-screen
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
-        })
-        .to(
-          vehiclePanelCloseRef.current,
-          {
-            y: "100%",
-            borderColor: "red", // Change border color instead of animating `border`
-            duration: 0.5,
-            ease: "power2.in",
-          },
-          "<", // Play this animation simultaneously with the previous one
-        );
+      timeline.to(vehiclePanelRef.current, {
+        y: "100%", // Moves the panel off-screen
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      });
     }
   }, [vehiclePanelOpen]);
+  useGSAP(() => {
+    if (vehiclePanelOpen) {
+      gsap.to(vehiclePanelRef.current, {
+        y: 0, // Moves the panel to its original position
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    } else {
+      const timeline = gsap.timeline(); // Use a timeline to sequence animations
+      timeline.to(vehiclePanelRef.current, {
+        y: "100%", // Moves the panel off-screen
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      });
+    }
+  }, [vehiclePanelOpen]);
+
+  useGSAP(() => {
+    if (confirmRidePanelOpen) {
+      gsap.to(confirmRidePanelRef.current, {
+        y: 0, // Moves the panel to its original position
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    } else {
+      const timeline = gsap.timeline(); // Use a timeline to sequence animations
+      timeline.to(confirmRidePanelRef.current, {
+        y: "100%", // Moves the panel off-screen
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      });
+    }
+  }, [confirmRidePanelOpen]);
+
+  useGSAP(() => {
+    if (vehicalFoundPanelOpen) {
+      gsap.to(vehicalFoundPanelRef.current, {
+        y: 0, // Moves the panel to its original position
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    } else {
+      const timeline = gsap.timeline(); // Use a timeline to sequence animations
+      timeline.to(vehicalFoundPanelRef.current, {
+        y: "100%", // Moves the panel off-screen
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      });
+    }
+  }, [vehicalFoundPanelOpen]);
+
+  useGSAP(() => {
+    if (waitingForDriverPanelOpen) {
+      gsap.to(waitingForDriverRef.current, {
+        y: 0, // Moves the panel to its original position
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    } else {
+      const timeline = gsap.timeline(); // Use a timeline to sequence animations
+      timeline.to(waitingForDriverRef.current, {
+        y: "100%", // Moves the panel off-screen
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      });
+    }
+  }, [waitingForDriverPanelOpen]);
 
   const {
     register,
@@ -124,7 +197,8 @@ export default function Home({}: Props) {
             <div className="flex w-full flex-col flex-wrap gap-1">
               <input
                 type="text"
-                id="firstName"
+                id="pickUpLocation"
+                required
                 className="w-full rounded-lg bg-[#eeeeee] px-8 py-3 text-base placeholder:text-sm"
                 onClick={() => setPanelOpen(true)}
                 placeholder="Add a pick up location"
@@ -139,8 +213,9 @@ export default function Home({}: Props) {
             <div className="flex w-full flex-col flex-wrap gap-1">
               <input
                 type="text"
-                id="lastName"
+                id="dropDestination"
                 className="w-full rounded-lg bg-[#eeeeee] px-8 py-3 text-base placeholder:text-sm"
+                required
                 onClick={() => setPanelOpen(true)}
                 placeholder="Enter your destination"
                 {...register("dropDestination")}
@@ -171,86 +246,35 @@ export default function Home({}: Props) {
       </div>
       <div
         ref={vehiclePanelRef}
-        className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-8"
+        className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-10 pt-12"
       >
-        <ChevronDown
-          onClick={() => {
-            console.log("first");
-            setVehicalPanelOpen(false);
-          }}
-          className="bb top-0 w-full text-gray-600"
-          size={35}
+        <VehiclePanel
+          setVehicalPanelOpen={setVehicalPanelOpen}
+          setConfirmRidePanelOpen={setConfirmRidePanelOpen}
         />
-        <h3 className="relative mb-5 text-center text-3xl font-bold underline underline-offset-4">
-          Chose a Vehicle
-        </h3>
-        <div className="mb-3 flex items-center justify-evenly rounded-xl border-4 bg-gray-200/80 p-3 active:border-black">
-          <img src={uberCar} alt="uber car" width={200} className="max-w-fit" />
-          <div className="mr-8 flex w-1/2 flex-1 flex-col items-center gap-2 capitalize tracking-tighter">
-            <div className="flex items-center gap-2 font-bold">
-              <h2 className="text-xl font-bold">UberGo</h2>
-              <span className="flex items-end">
-                <User />
-                <p>4</p>
-              </span>
-            </div>
-            <h5 className="text-sm font-medium">2 mints away</h5>
-            <p className="text-base font-medium text-gray-700">
-              Affordable, compact rides
-            </p>
-          </div>
-          <div>
-            <h2 className="px-3 text-2xl font-bold">199.30</h2>
-          </div>
-        </div>
-        <div className="mb-3 flex items-center justify-evenly rounded-xl border-4 bg-gray-200/80 p-3 active:border-black">
-          <img
-            src={uberBike}
-            alt="uber bike"
-            width={150}
-            className="max-w-fit"
-          />
-          <div className="flex w-1/2 flex-1 flex-col items-center gap-2 capitalize tracking-tighter">
-            <div className="flex items-center gap-2 font-bold">
-              <h2 className="text-xl font-bold">UberBike</h2>
-              <span className="flex items-end">
-                <User />
-                <p>2</p>
-              </span>
-            </div>
-            <h5 className="text-sm font-medium">5 mints away</h5>
-            <p className="text-base font-medium text-gray-700">
-              Affordable motorcycle, compact rides
-            </p>
-          </div>
-          <div className="">
-            <h2 className="px-3 text-2xl font-bold">120.30</h2>
-          </div>
-        </div>
-        <div className="mb-3 flex items-center justify-around rounded-xl border-4 bg-gray-200/80 p-3 active:border-black">
-          <img
-            src={uberAuto}
-            alt="uber bike"
-            width={150}
-            className="max-w-fit"
-          />
-          <div className="flex w-1/2 flex-1 flex-col items-center gap-2 capitalize tracking-tighter">
-            <div className="flex items-center gap-2 font-bold">
-              <h2 className="text-xl font-bold">UberAuto</h2>
-              <span className="flex items-end">
-                <User />
-                <p>3</p>
-              </span>
-            </div>
-            <h5 className="text-sm font-medium">15 mints away</h5>
-            <p className="text-base font-medium text-gray-700">
-              Affordable auto, compact rides
-            </p>
-          </div>
-          <div className="">
-            <h2 className="px-3 text-2xl font-bold">140.30</h2>
-          </div>
-        </div>
+      </div>
+      <div
+        ref={confirmRidePanelRef}
+        className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-6 pt-10"
+      >
+        <ConfirmRide
+          setConfirmRidePanelOpen={setConfirmRidePanelOpen}
+          setvehicalFoundPanelOpen={setvehicalFoundPanelOpen}
+        />
+      </div>
+      <div
+        ref={vehicalFoundPanelRef}
+        className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-6 pt-10"
+      >
+        <LookingForDriver setvehicalFoundPanelOpen={setvehicalFoundPanelOpen} />
+      </div>
+      <div
+        ref={waitingForDriverRef}
+        className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-6 pt-10"
+      >
+        <WaitingForDriver
+          setWaitingForDriverPanelOpen={setWaitingForDriverPanelOpen}
+        />
       </div>
     </div>
   );

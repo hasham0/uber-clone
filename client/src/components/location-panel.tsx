@@ -24,7 +24,7 @@ const LocationPanel: FC<Props> = ({ setVehicalPanelOpen, setPanelOpen }) => {
           <div className="rounded-full bg-[#eee] p-2">
             <MapPin size={25} />
           </div>
-          <div className="">
+          <div>
             <h4 className="text-xl font-semibold">{location}</h4>
           </div>
         </div>
