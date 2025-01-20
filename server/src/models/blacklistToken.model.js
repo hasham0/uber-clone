@@ -14,6 +14,6 @@ const blacklistTokenSchema = new Schema({
 });
 
 const BlacklistToken =
-    model["BlacklistToken"] || model("BlacklistToken", blacklistTokenSchema);
+    model.BlacklistToken || model("BlacklistToken", blacklistTokenSchema);
 
 export default BlacklistToken;

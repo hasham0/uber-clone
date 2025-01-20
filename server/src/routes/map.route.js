@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authUser } from "../middlewares/auth.middleware.js";
 import {
+    getAutoSuggestions,
     getCoordinates,
     getDistanceTime,
 } from "../controllers/map.controller.js";
@@ -26,4 +27,10 @@ router
         getDistanceTime
     );
 
+router
+    .route("/get-suggestions")
+    .get(
+        [authUser, query("input").isString().isLength({ min: 3 })],
+        getAutoSuggestions
+    );
 export default router;
