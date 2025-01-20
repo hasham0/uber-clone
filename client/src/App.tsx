@@ -14,6 +14,7 @@ import CaptainLogout from "./pages/CaptainLogout";
 
 const Riding = lazy(() => import("./pages/Riding"));
 const CaptainLogin = lazy(() => import("./pages/CaptainLogin"));
+const CaptainRiding = lazy(() => import("./pages/CaptainRiding"));
 const UserLogin = lazy(() => import("./pages/UserLogin"));
 const UserRegister = lazy(() => import("./pages/UserSignup"));
 const CaptainRegister = lazy(() => import("./pages/CaptainSignup"));
@@ -55,7 +56,7 @@ function App() {
                       <UserLogin />
                     </SuspenseWrapper>
                   }
-                />{" "}
+                />
                 <Route
                   path="/logout"
                   element={
@@ -65,7 +66,7 @@ function App() {
                       </SuspenseWrapper>
                     </UserProtectedWrapper>
                   }
-                />{" "}
+                />
                 <Route
                   path="/riding"
                   element={
@@ -92,7 +93,7 @@ function App() {
                       <CaptainLogin />
                     </SuspenseWrapper>
                   }
-                />{" "}
+                />
                 <Route
                   path="/captain-logout"
                   element={
@@ -109,6 +110,16 @@ function App() {
                     <CaptainProtectedWrapper>
                       <SuspenseWrapper>
                         <CaptainHome />
+                      </SuspenseWrapper>
+                    </CaptainProtectedWrapper>
+                  }
+                />{" "}
+                <Route
+                  path="/captain-riding"
+                  element={
+                    <CaptainProtectedWrapper>
+                      <SuspenseWrapper>
+                        <CaptainRiding />
                       </SuspenseWrapper>
                     </CaptainProtectedWrapper>
                   }

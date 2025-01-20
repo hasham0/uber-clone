@@ -11,6 +11,7 @@ import cookieParser from "cookie-parser";
 // import api routes
 import userRoutes from "./routes/user.route.js";
 import captainRoutes from "./routes/captain.route.js";
+import mapRoutes from "./routes/map.route.js";
 
 // import global level error handle middlewares
 import errorMiddleware from "./middlewares/error.middleware.js";
@@ -33,6 +34,7 @@ app.use(
 // set routes
 app.use("/api/user", userRoutes);
 app.use("/api/captain", captainRoutes);
+app.use("/api/map", mapRoutes);
 
 // set global level error handling middlwere
 app.use(errorMiddleware);

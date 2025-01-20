@@ -25,8 +25,8 @@ const ConfirmRide: FC<Props> = ({
       <h3 className="relative mt-2 text-center text-3xl font-bold underline underline-offset-4">
         Confirm your Ride
       </h3>
-      <div className="flex flex-col items-center justify-between gap-5">
-        <img src={uberCar} alt="uber car" width={300} />
+      <div className="flex flex-col items-center justify-between">
+        <img src={uberCar} alt="uber car" width={150} />
         <div className="mt-5 w-full">
           <div className="mx-10 mb-4 flex items-center justify-start gap-5 border-b-2 py-4">
             <MapPinHouse size={40} />

@@ -87,10 +87,24 @@ const PickUpSchema = z.object({
 
 type PickUpSchemaTS = z.infer<typeof PickUpSchema>;
 
-export { SignInSchema, SignUpSchema, SignUpSchemaCaptain, PickUpSchema };
+// otp schema
+const OTPSchema = z.object({
+  OTP: z.number(),
+});
+
+type OTPSchemaTS = z.infer<typeof OTPSchema>;
+
+export {
+  SignInSchema,
+  SignUpSchema,
+  SignUpSchemaCaptain,
+  PickUpSchema,
+  OTPSchema,
+};
 export type {
   SignInSchemaTS,
   SignUpSchemaTS,
   SignUpSchemaCaptainTS,
   PickUpSchemaTS,
+  OTPSchemaTS,
 };

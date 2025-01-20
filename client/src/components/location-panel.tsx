@@ -19,13 +19,13 @@ const LocationPanel: FC<Props> = ({ setVehicalPanelOpen, setPanelOpen }) => {
             setPanelOpen(false);
           }}
           key={index}
-          className="m-6 flex items-center justify-start gap-4 rounded-xl border bg-gray-100/50 p-3 text-lg active:border-2 active:border-black"
+          className="m-2 flex items-center justify-start gap-2 rounded-xl border bg-gray-100/50 p-3 text-base active:border-2 active:border-black"
         >
           <div className="rounded-full bg-[#eee] p-2">
-            <MapPin size={25} />
+            <MapPin size={20} />
           </div>
           <div>
-            <h4 className="text-xl font-semibold">{location}</h4>
+            <h4 className="text-sm font-semibold">{location}</h4>
           </div>
         </div>
       ))}

@@ -6,12 +6,13 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import LocationPanel from "../components/location-panel";
 import VehiclePanel from "../components/vehicle-panel";
 import ConfirmRide from "../components/confrm-ride";
 import LookingForDriver from "../components/looking-for-driver";
 import WaitingForDriver from "../components/waiting-for-driver";
+import { Link } from "react-router-dom";
 
 type Props = {};
 
@@ -35,27 +36,21 @@ export default function Home({}: Props) {
   useGSAP(() => {
     if (panelOpen) {
       gsap.to(panelRef.current, {
-        height: "80%",
-        display: "block",
-        opacity: 1,
-        overflow: "visible",
-        duration: 0.5,
+        height: "70%",
+        padding: 24,
+        // opacity:1
       });
       gsap.to(panelCloseRef.current, {
         opacity: 1,
-        duration: 0.5,
       });
     } else {
       gsap.to(panelRef.current, {
         height: "0%",
-        display: "none", // Ensure it's fully hidden
-        opacity: 0,
-        overflow: "hidden", // Prevent scroll
-        duration: 0.5,
+        padding: 0,
+        // opacity:0
       });
       gsap.to(panelCloseRef.current, {
         opacity: 0,
-        duration: 0.5,
       });
     }
   }, [panelOpen]);
@@ -63,36 +58,23 @@ export default function Home({}: Props) {
   useGSAP(() => {
     if (vehiclePanelOpen) {
       gsap.to(vehiclePanelRef.current, {
-        y: 0, // Moves the panel to its original position
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
+        transform: "translateY(0)",
       });
     } else {
-      const timeline = gsap.timeline(); // Use a timeline to sequence animations
-      timeline.to(vehiclePanelRef.current, {
-        y: "100%", // Moves the panel off-screen
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
+      gsap.to(vehiclePanelRef.current, {
+        transform: "translateY(100%)",
       });
     }
   }, [vehiclePanelOpen]);
+
   useGSAP(() => {
     if (vehiclePanelOpen) {
       gsap.to(vehiclePanelRef.current, {
-        y: 0, // Moves the panel to its original position
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
+        transform: "translateY(0)",
       });
     } else {
-      const timeline = gsap.timeline(); // Use a timeline to sequence animations
-      timeline.to(vehiclePanelRef.current, {
-        y: "100%", // Moves the panel off-screen
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
+      gsap.to(vehiclePanelRef.current, {
+        transform: "translateY(100%)",
       });
     }
   }, [vehiclePanelOpen]);
@@ -100,18 +82,11 @@ export default function Home({}: Props) {
   useGSAP(() => {
     if (confirmRidePanelOpen) {
       gsap.to(confirmRidePanelRef.current, {
-        y: 0, // Moves the panel to its original position
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
+        transform: "translateY(0)",
       });
     } else {
-      const timeline = gsap.timeline(); // Use a timeline to sequence animations
-      timeline.to(confirmRidePanelRef.current, {
-        y: "100%", // Moves the panel off-screen
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
+      gsap.to(confirmRidePanelRef.current, {
+        transform: "translateY(100%)",
       });
     }
   }, [confirmRidePanelOpen]);
@@ -119,18 +94,11 @@ export default function Home({}: Props) {
   useGSAP(() => {
     if (vehicalFoundPanelOpen) {
       gsap.to(vehicalFoundPanelRef.current, {
-        y: 0, // Moves the panel to its original position
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
+        transform: "translateY(0)",
       });
     } else {
-      const timeline = gsap.timeline(); // Use a timeline to sequence animations
-      timeline.to(vehicalFoundPanelRef.current, {
-        y: "100%", // Moves the panel off-screen
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
+      gsap.to(vehicalFoundPanelRef.current, {
+        transform: "translateY(100%)",
       });
     }
   }, [vehicalFoundPanelOpen]);
@@ -138,18 +106,11 @@ export default function Home({}: Props) {
   useGSAP(() => {
     if (waitingForDriverPanelOpen) {
       gsap.to(waitingForDriverRef.current, {
-        y: 0, // Moves the panel to its original position
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
+        transform: "translateY(0)",
       });
     } else {
-      const timeline = gsap.timeline(); // Use a timeline to sequence animations
-      timeline.to(waitingForDriverRef.current, {
-        y: "100%", // Moves the panel off-screen
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
+      gsap.to(waitingForDriverRef.current, {
+        transform: "translateY(100%)",
       });
     }
   }, [waitingForDriverPanelOpen]);
@@ -173,10 +134,15 @@ export default function Home({}: Props) {
   };
   return (
     <div className="relative h-screen overflow-hidden">
-      <img
-        src={uberLogo}
-        className="absolute left-5 top-5 w-16 rounded-md bg-white p-1"
-      />
+      <div className="fixed top-0 z-20 flex w-full items-center justify-between p-3">
+        <img src={uberLogo} className="w-12 rounded-md bg-white p-1" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
+          <Link to={"/logout"}>
+            <LogOut size={20} className="font-medium" />
+          </Link>
+        </div>
+      </div>
+
       <div className="h-screen w-screen">
         <img className="h-full w-full object-cover" src={uberMap} />
       </div>
