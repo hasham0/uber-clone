@@ -1,23 +1,39 @@
 import { MapPin } from "lucide-react";
 import { Dispatch, FC, SetStateAction } from "react";
-import { locations } from "../data";
+import { LocationSuggestionsResponse } from "../types";
 
 type Props = {
-  setVehicalPanelOpen: Dispatch<SetStateAction<boolean>>;
-  setPanelOpen: Dispatch<SetStateAction<boolean>>;
+  setPickup: Dispatch<SetStateAction<string | null>>;
+  setDestination: Dispatch<SetStateAction<string | null>>;
+  suggestions: LocationSuggestionsResponse;
+  activeField: null | string;
 };
 
-const LocationPanel: FC<Props> = ({ setVehicalPanelOpen, setPanelOpen }) => {
+const LocationPanel: FC<Props> = ({
+  suggestions,
+  activeField,
+  setDestination,
+  setPickup,
+}) => {
+  interface Suggestion {
+    description: string;
+  }
+
+  const handleSuggestionsClick = (suggestion: Suggestion) => {
+    if (activeField === "pickup") {
+      setPickup(suggestion.description);
+    } else if (activeField === "destination") {
+      setDestination(suggestion.description);
+    }
+  };
+
   return (
     <div className="p-2">
       {/* sample data */}
 
-      {locations.map((location, index: number) => (
+      {suggestions.map((suggestion, index: number) => (
         <div
-          onClick={() => {
-            setVehicalPanelOpen(true);
-            setPanelOpen(false);
-          }}
+          onClick={() => handleSuggestionsClick(suggestion)}
           key={index}
           className="m-2 flex items-center justify-start gap-2 rounded-xl border bg-gray-100/50 p-3 text-base active:border-2 active:border-black"
         >
@@ -25,7 +41,7 @@ const LocationPanel: FC<Props> = ({ setVehicalPanelOpen, setPanelOpen }) => {
             <MapPin size={20} />
           </div>
           <div>
-            <h4 className="text-sm font-semibold">{location}</h4>
+            <h4 className="text-sm font-semibold">{suggestion.description}</h4>
           </div>
         </div>
       ))}

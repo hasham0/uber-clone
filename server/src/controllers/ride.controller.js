@@ -1,4 +1,4 @@
-import { createRide } from "../lib/services/ride.service.js";
+import { createRide, vehicleTypeFare } from "../lib/services/ride.service.js";
 import { ValidationError } from "../lib/utils/customize-error-messages.js";
 import asyncHandler from "../middlewares/async-handler.js";
 import { validationResult } from "express-validator";
@@ -23,4 +23,17 @@ const rideRequest = asyncHandler(async (request, response) => {
     });
 });
 
-export { rideRequest };
+const getFare = asyncHandler(async (request, response) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+        throw new ValidationError(errors.array(), 400);
+    }
+    const { pickup, destination } = request.query;
+
+    const fare = await vehicleTypeFare(pickup, destination);
+    return response.status(201).json({
+        data: fare,
+    });
+});
+
+export { rideRequest, getFare };

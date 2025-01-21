@@ -30,7 +30,7 @@ router
 router
     .route("/get-suggestions")
     .get(
-        [authUser, query("input").isString().isLength({ min: 3 })],
+        [authUser, query("input").isString().isLength({ min: 1 })],
         getAutoSuggestions
     );
 export default router;

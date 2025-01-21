@@ -1,6 +1,6 @@
 import { distanceAndTime } from "../services/map.service.js";
 
-const getFare = async (pickup, destination) => {
+const calculateFare = async (pickup, destination) => {
     const distanceTime = await distanceAndTime(pickup, destination);
     const baseFare = {
         auto: 30,
@@ -36,4 +36,4 @@ const getFare = async (pickup, destination) => {
     return fare;
 };
 
-export default getFare;
+export default calculateFare;

@@ -1,9 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import uberCar from "../assets/images/Uber-PNG-Photos.png";
+import uberBike from "../assets/images/Uber-bike.webp";
+import uberAuto from "../assets/images/Uber-Auto.webp";
 import uberLogo from "../assets/images/uberLogo.png";
 import uberMap from "../assets/images/uberMap.gif";
 import { PickUpSchema, PickUpSchemaTS } from "../lib/schema";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ChevronDown, LogOut } from "lucide-react";
@@ -13,10 +16,23 @@ import ConfirmRide from "../components/confrm-ride";
 import LookingForDriver from "../components/looking-for-driver";
 import WaitingForDriver from "../components/waiting-for-driver";
 import { Link } from "react-router-dom";
+import { locationSuggestions } from "../lib/utils/map/map-query-functions";
+import {
+  LocationSuggestionsResponse,
+  VehicaleFareTS,
+  VehicleAndFareTS,
+} from "../types";
+import { calculateVehicaleFare } from "../lib/utils/ride/ride-query-functions";
 
 type Props = {};
 
 export default function Home({}: Props) {
+  const [pickup, setPickup] = useState<null | string>(null);
+  const [destination, setDestination] = useState<null | string>(null);
+  const [location, setLocation] = useState<{
+    pickup: string;
+    destination: string;
+  } | null>(null);
   const [panelOpen, setPanelOpen] = useState<boolean>(false);
   const [vehiclePanelOpen, setVehicalPanelOpen] = useState<boolean>(false);
   const [confirmRidePanelOpen, setConfirmRidePanelOpen] =
@@ -25,6 +41,20 @@ export default function Home({}: Props) {
     useState<boolean>(false);
   const [waitingForDriverPanelOpen, setWaitingForDriverPanelOpen] =
     useState<boolean>(false);
+  const [pickupSuggestions, setPickupSuggestions] =
+    useState<LocationSuggestionsResponse>([]);
+  const [destinationSuggestions, setDestinationSuggestions] =
+    useState<LocationSuggestionsResponse>([]);
+  const [activeField, setActiveField] = useState<null | string>(null);
+  const [vehicaleFare, setVehicaleFare] = useState<VehicaleFareTS>({
+    auto: 0,
+    car: 0,
+    motorcycle: 0,
+  });
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [selectedVehicleData, setSelectedVehicleData] =
+  //   useState<SelectedVehicaleDataTS | null>(null);
 
   const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
@@ -32,11 +62,19 @@ export default function Home({}: Props) {
   const confirmRidePanelRef = useRef(null);
   const vehicalFoundPanelRef = useRef(null);
   const waitingForDriverRef = useRef(null);
+  const [vehicleAndFare, setVehicleAndFare] = useState<VehicleAndFareTS>({
+    destination: "",
+    fare: 0,
+    pickup: "",
+    vehicleImage: "",
+    vehicleName: "",
+    alternameName: "",
+  });
 
   useGSAP(() => {
     if (panelOpen) {
       gsap.to(panelRef.current, {
-        height: "70%",
+        height: "62%",
         padding: 24,
         // opacity:1
       });
@@ -54,18 +92,6 @@ export default function Home({}: Props) {
       });
     }
   }, [panelOpen]);
-
-  useGSAP(() => {
-    if (vehiclePanelOpen) {
-      gsap.to(vehiclePanelRef.current, {
-        transform: "translateY(0)",
-      });
-    } else {
-      gsap.to(vehiclePanelRef.current, {
-        transform: "translateY(100%)",
-      });
-    }
-  }, [vehiclePanelOpen]);
 
   useGSAP(() => {
     if (vehiclePanelOpen) {
@@ -124,14 +150,92 @@ export default function Home({}: Props) {
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const handlePickupChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    setPickup(event.target.value);
+    const response = await locationSuggestions(event.target.value);
+    setPickupSuggestions(response.data);
+  };
+
+  const handleDestinationChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    setDestination(event.target.value);
+    const response = await locationSuggestions(event.target.value);
+    setDestinationSuggestions(response.data);
+  };
+
   const onSubmit: SubmitHandler<PickUpSchemaTS> = async (location) => {
     try {
-      console.log(location);
+      if (!location) return null;
+      setLocation({
+        pickup: location.pickUpLocation,
+        destination: location.dropDestination,
+      });
+      setVehicalPanelOpen(true);
+      setPanelOpen(false);
     } catch (error) {
       const err = error instanceof Error ? error.message : "An error occurred";
       setErrorMessage(err);
     }
   };
+
+  useEffect(() => {
+    const fetchVehicaleFare = async () => {
+      if (location?.pickup && location?.destination) {
+        setIsLoading(true);
+        try {
+          const { data } = await calculateVehicaleFare(
+            location.pickup,
+            location.destination,
+          );
+          setVehicaleFare({
+            auto: data.auto,
+            car: data.car,
+            motorcycle: data.motorcycle,
+          });
+        } catch (error) {
+          console.error("Error fetching vehicle fare:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchVehicaleFare();
+  }, [location?.pickup, location?.destination]);
+
+  const createRide = async (vehicaleName: string) => {
+    if (!vehicaleName || !location || !location.pickup || !location.destination)
+      return;
+
+    const vehicleData = {
+      UberGo: {
+        alternameName: "uber car",
+        fare: vehicaleFare.car,
+        vehicleImage: uberCar,
+      },
+      UberBike: {
+        alternameName: "uber bike",
+        fare: vehicaleFare.motorcycle,
+        vehicleImage: uberBike,
+      },
+      UberAuto: {
+        alternameName: "uber auto",
+        fare: vehicaleFare.auto,
+        vehicleImage: uberAuto,
+      },
+    }[vehicaleName];
+
+    if (vehicleData) {
+      setVehicleAndFare({
+        vehicleName: vehicaleName,
+        ...vehicleData,
+        pickup: location.pickup,
+        destination: location.destination,
+      });
+    }
+  };
+
   return (
     <div className="relative h-screen overflow-hidden">
       <div className="fixed top-0 z-20 flex w-full items-center justify-between p-3">
@@ -166,9 +270,15 @@ export default function Home({}: Props) {
                 id="pickUpLocation"
                 required
                 className="w-full rounded-lg bg-[#eeeeee] px-8 py-3 text-base placeholder:text-sm"
-                onClick={() => setPanelOpen(true)}
+                onClick={() => {
+                  setPanelOpen(true);
+                  setActiveField("pickup");
+                }}
                 placeholder="Add a pick up location"
-                {...register("pickUpLocation")}
+                {...register("pickUpLocation", {
+                  value: pickup || "",
+                  onChange: handlePickupChange,
+                })}
               />
               {errors.pickUpLocation && (
                 <p className="text-sm text-red-600">
@@ -182,9 +292,15 @@ export default function Home({}: Props) {
                 id="dropDestination"
                 className="w-full rounded-lg bg-[#eeeeee] px-8 py-3 text-base placeholder:text-sm"
                 required
-                onClick={() => setPanelOpen(true)}
+                onClick={() => {
+                  setPanelOpen(true);
+                  setActiveField("destination");
+                }}
                 placeholder="Enter your destination"
-                {...register("dropDestination")}
+                {...register("dropDestination", {
+                  value: destination || "",
+                  onChange: handleDestinationChange,
+                })}
               />
               {errors.dropDestination && (
                 <p className="text-sm text-red-600">
@@ -205,8 +321,14 @@ export default function Home({}: Props) {
         </form>
         <div ref={panelRef} className={`bg-white`}>
           <LocationPanel
-            setVehicalPanelOpen={setVehicalPanelOpen}
-            setPanelOpen={setPanelOpen}
+            suggestions={
+              activeField === "pickup"
+                ? pickupSuggestions
+                : destinationSuggestions
+            }
+            activeField={activeField}
+            setPickup={setPickup}
+            setDestination={setDestination}
           />
         </div>
       </div>
@@ -217,6 +339,9 @@ export default function Home({}: Props) {
         <VehiclePanel
           setVehicalPanelOpen={setVehicalPanelOpen}
           setConfirmRidePanelOpen={setConfirmRidePanelOpen}
+          isLoading={isLoading}
+          vehicaleFare={vehicaleFare}
+          createRide={createRide}
         />
       </div>
       <div
@@ -224,6 +349,7 @@ export default function Home({}: Props) {
         className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-6 pt-10"
       >
         <ConfirmRide
+          vehicleAndFare={vehicleAndFare}
           setConfirmRidePanelOpen={setConfirmRidePanelOpen}
           setvehicalFoundPanelOpen={setvehicalFoundPanelOpen}
         />
@@ -232,7 +358,12 @@ export default function Home({}: Props) {
         ref={vehicalFoundPanelRef}
         className="fixed bottom-0 z-20 w-full translate-y-full bg-white px-3 py-6 pt-10"
       >
-        <LookingForDriver setvehicalFoundPanelOpen={setvehicalFoundPanelOpen} />
+        {!confirmRidePanelOpen && (
+          <LookingForDriver
+            vehicleAndFare={vehicleAndFare}
+            setvehicalFoundPanelOpen={setvehicalFoundPanelOpen}
+          />
+        )}
       </div>
       <div
         ref={waitingForDriverRef}

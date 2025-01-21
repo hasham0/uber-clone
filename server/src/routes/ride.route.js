@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authUser } from "../middlewares/auth.middleware.js";
-import { body } from "express-validator";
-import { rideRequest } from "../controllers/ride.controller.js";
+import { body, query } from "express-validator";
+import { getFare, rideRequest } from "../controllers/ride.controller.js";
 
 const router = Router();
 
@@ -23,6 +23,22 @@ router
                 .withMessage("Invalid vehicle type"),
         ],
         rideRequest
+    );
+router
+    .route("/calculate-fare")
+    .get(
+        [
+            authUser,
+            query("pickup")
+                .isString()
+                .isLength({ min: 3 })
+                .withMessage("Invalid pickup address"),
+            query("destination")
+                .isString()
+                .isLength({ min: 3 })
+                .withMessage("Invalid destination address"),
+        ],
+        getFare
     );
 
 export default router;
